@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+  <script type="text/javascript" src="../JS/login.js"></script>
+  <head>
+    <title>Interface for B&R automation</title>
+    <link href="../CSS/login.css" rel="stylesheet" />
+  </head>
+
+  <body>
+    <!-- Menu Navigation Bar -->
+    <div class="menu">
+      <a href="home.html">Home</a>
+      <div class="menuSpacers">
+        <a>||</a>
+      </div>
+      <a href="completedBatches.html">Completed batches</a>
+      <div class="menuSpacers">
+        <a>||</a>
+      </div>
+      <a href="events.html">Event log</a>
+      <div class="menu-log">
+        <a href="login.html">Login</a>
+      </div>
+    </div>
+
+    <!-- Body section -->
+    <section>
+      <div class="login">
+        <br />
+        Username: <input id="username" type="text" name="username" />
+        <br />
+        Password: <input id="password" type="password" name="password" />
+        <br />
+        <input id="loginbtn " type="button" value="Login" onclick="login()" />
+      </div>
+    </section>
+    <!-- Footer Section -->
+    <footer>
+      University of Southern Denmark (SDU) Odense.<br />
+      Software technology, 3rd semester, semesterproject, group 11.
+    </footer>
+  </body>
+</html>

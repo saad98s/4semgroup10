@@ -1,0 +1,347 @@
+<!DOCTYPE html> 
+<html> 
+    <script type="text/javascript" src="../JS/home.js"></script>
+    <script src="../Scripts/CanvasJS/canvasjs.min.js"></script>
+    <script type="text/javascript">
+
+    let tempChart;
+    let humChart;
+    let ingredientChart;
+    
+
+
+
+    let tempValues = [{}];
+    let tempXVal = tempValues.length;
+    let humValues = [{}]
+    let humXVal = humValues.length
+    let ingredientValues = [
+                    {x:1, y:0, label:"Barley"},
+                    {x:2, y:0, label:"Malt"},
+                    {x:3, y:0, label:"Hops"},
+                    {x:4, y:0, label:"Wheat"},
+                    {x:5, y:0, label:"Yeast"}
+                ]; 
+
+    window.onload = function () {
+
+        tempChart = new CanvasJS.Chart("temperature",{
+            title :{
+                text: "Temperature"
+            },
+            axisX: {						
+                title: "Reading",
+                interval: 1
+            },
+            axisY: {						
+                title: "Temperature in Celcius",
+                minimum: 0,
+                stripLines:[{      
+                    startValue:65,
+                    endValue:65.25,
+                    color:"Red",
+                    lineDashType: "dash",
+                    label : "65°C"
+                }],
+            },
+            data: [{
+                type: "line",
+                indexLabel: "{y}°C",
+                indexLabelPlacement: "outside",  
+                indexLabelOrientation: "horizontal",
+                dataPoints : tempValues
+            }]
+        });
+
+        humChart = new CanvasJS.Chart("humidity",{
+            title :{
+      		    text: "Humidity"
+      	    },
+            axisX: {						
+                title: "Reading",
+                interval: 1
+            },
+            axisY: {						
+                title: "Relative humidity",
+                minimum: 0
+            },
+            data: [{
+                type: "line",
+                indexLabel: "{y}%",
+                indexLabelPlacement: "outside",  
+                indexLabelOrientation: "horizontal",
+                dataPoints : humValues
+            }]
+        })
+
+        ingredientChart = new CanvasJS.Chart("ingredients",{
+          title :{
+      		text: "Ingredients"
+      	},
+      	axisX: {						
+      		title: "Ingredients"
+      	},
+      	axisY: {						
+              title: "Amount",
+              maximum: 35000,
+              minimum: 0
+      	},
+      	data: [{
+                type: "column",
+                indexLabel: "{y}",
+                indexLabelPlacement: "inside",  
+                indexLabelOrientation: "horizontal",
+                dataPoints: ingredientValues
+        	}]
+        })
+        
+
+
+
+      tempChart.render();
+      humChart.render();
+      ingredientChart.render();
+    
+    //Probably Redundant
+    //setInterval(function(){updateChart()}, updateInterval);
+    //setInterval(function(){multiGraphUpdater()}, updateInterval);  
+    }
+
+
+function updateIngredientChart(){
+        let graphString;
+        let graphStringArray;
+        graphString = document.getElementById("hiddenString").value;
+        graphStringArray = graphString.split(";");
+        graphStringArray = graphStringArray.slice(2,graphStringArray.length+1)
+        console.log(graphStringArray)
+        for(let i = 0; i<ingredientValues.length; i++){
+            console.log(graphStringArray[i])
+            ingredientValues[i].y = parseInt(graphStringArray[i]);
+        }
+        ingredientChart.render();
+};
+function chartRender(){
+    let graphString;
+    var graphStringArray;
+    graphString = document.getElementById("hiddenString").value;
+    graphStringArray = graphString.split(";");
+    console.log(graphStringArray)
+    humXVal++;
+    humValues.push({x:humXVal-1, y: parseFloat(graphStringArray[0])})
+    if (humValues.length >  15 )
+      	{
+      		humValues.shift();				
+        }
+
+    tempXVal++;
+    tempValues.push({x:tempXVal-1, y: parseFloat(graphStringArray[1])})
+    if (tempValues.length >  15 )
+      	{
+      		tempValues.shift();				
+      	}
+    humChart.render();
+    tempChart.render();
+}
+
+function multiGraphUpdater(){
+    updateIngredientChart();
+    chartRender();
+}
+
+    </script>
+<head> 
+    <title>Interface for B&R automation</title> 
+    <link href="../CSS/home.css" rel="stylesheet">
+</head> 
+
+<body> 
+    <!-- Menu Navigation Bar -->
+    <div class="menu"> 
+        <a href="home.html">Home</a>
+        <div class="menuSpacers">
+            <a>||</a>
+        </div> 
+        <a href="completedBatches.html">Completed batches</a>
+        <div class="menuSpacers">
+            <a>||</a>
+        </div> 
+        <a href="events.html">Event log</a> 
+        <div class="menu-log"> 
+            <a href="login.html">Login</a> 
+        </div>
+    </div> 
+    </div> 
+
+    <!-- Body section -->
+    <div id="body">
+    <section>
+        <div class="container1">
+            <br>
+                <div class="inputs">
+                    <label for="batchID">Batch ID:</label><br>
+                    <input id="batchID" type="number" name="batchID" placeholder="(0-65535)" onchange=machineSpeedLimiter()>
+                    <span id="batchIDError"></span>
+                    <br>
+
+                    <label for="productType">Product type:</label><br>
+                    <select id="productType" name="productType" onchange="machineSpeedLimiter()">
+                        <option value="0">0 - Pilsner</option>
+                        <option value="1">1 - Wheat</option>
+                        <option value="2">2 - IPA</option>
+                        <option value="3">3 - Stout</option>
+                        <option value="4">4 - Ale</option>
+                        <option value="5">5 - Alchohol Free</option>
+                    </select><br>
+
+                    <label for="productAmount">Product amount:</label><br>
+                    <input id="productAmount" type="number" name="productAmount" placeholder="(0-65535)" onchange=machineSpeedLimiter()>
+                    <span id="productAmountError"></span>
+                    <br>
+                    
+                    <label for="machineSpeed">Machine Speed:</label><br>
+                    <input id="machineSpeed" type="number" name="machineSpeed" min="0" max="600" placeholder="(0-600)" onchange=machineSpeedLimiter()>
+                    <span id="machineSpeedError"></span>
+                    <br>
+                    <label for="recommendedMachineSpeed">Recommended Machine Speed: </label>
+                    <div id="recommendedMachineSpeed"></div>
+                    
+                    <br>
+                    <br>
+                    
+                    <div class="productTypeInfo">
+                    <span id="productTypeInfo">ID's for different product types:<br> 
+                        0 = Pilsner<br>
+                        1 = Wheat<br>
+                        2 = IPA<br>
+                        3 = Stout<br>
+                        4 = Ale<br>
+                        5 = Alchohol Free<br>
+                    </span>
+                    </div>
+                    <br>
+                    <input id="submitbtn" type="button" value="Start production" onclick="sendBatchInfo()">
+                    <input id="stopProdbtn" type="button" value="Stop production" onclick="stopProduction()">
+                    <br>
+                    <br>
+                    <input id="updatebtn" type="button" value="Start visualizing" onclick="startMonitoring()">
+                    <input id="stopMonitorbtn" type="button" value="Stop visualizing" disabled onclick="stopMonitor()">
+                    <br>
+                    <br>
+                    <input id="saveBatchReportToDB" type="button" value="    Save batch report to database   " disabled onclick="saveBatchReportToDB()">
+                    <br>
+                    <br>
+                    Maintenance
+                    <div id=progressContainer>
+                    <div id="maintenanceBar"></div>
+                    </div>
+                    <br>
+                    ___________________________________
+                    <br>
+                </div>
+                    <table id="batchIDTable" style="height: 100px;">
+                            <tr>
+                                <td>
+                                    Batch ID<br>
+                                    <img src = "../Pictures/Batch ID.png"/></td>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td id="batchIDRunningProduction">Unknown</td>
+                            </tr>
+                    </table>
+                    <br>
+                    ___________________________________
+                    <br>
+                    <table id="machineSpeedTable" style="height: 100px;">
+                            <tr>
+                                <td>
+                                    Current machine speed
+                                    <img src = "../Pictures/Speed.png"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td id="machineSpeedRunningProduction">Unknown</td>
+                            </tr>
+                    </table>
+        </div>
+    </section>
+    <section>
+        <div class = "body_sec"> 
+            <section id="content"> 
+                <h3>Overview of running production</h3> 
+                        <table id="table1" style="width: auto;">
+                            <tr>
+                                <td>
+                                    State    
+                                    <img src = "../Pictures/PackML.png"/>
+                                </td>
+                                <td> 
+                                    Desired Amount of products 
+                                    <img src = "../Pictures/Batch.png"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td id="productionStatus">Unknown</td>
+                                <td id="amountOfProductsRunningProduction">Unknown</td>
+                            </tr>
+                        </table>
+                        <table id="table2" style="width: auto;">
+                            <tr>
+                                <td>
+                                    Vibration <br>
+                                    <img src = "../Pictures/Vibration.png"/>
+                                </td>
+                                <td>
+                                    Acceptable products
+                                    <img src = "../Pictures/Bottle accepted.png"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td id="vibrationRunningProduction">Unknown</td>
+                                
+                                <td id="acceptableProductsRunningProduction">Unknown</td>
+                            </tr>
+                            
+                        </table>
+                        <table id="table3" style="width: auto;">
+                            <tr>
+                                <td>
+                                    Product Type
+                                    <img src = "../Pictures/Bottle.png"/>
+                                </td>
+                                <td>
+                                    Defect products
+                                    <img src = "../Pictures/Bottle destroyed.png"/>
+                                </td>
+                                
+                            </tr>
+                            <tr>
+                                <td id="productTypeRunningProduction">Unknown</td>
+                                <td id="defectProductsRunningProduction">Unknown</td>
+                            </tr>
+                        </table>
+
+            </section>
+            <br>
+
+            <div id="progressGraphs">
+                <div id="humBlock">
+                    <!-- <img src = "../Pictures/Humidity.png" style="height: 30px" width="30px"/> -->
+                    <div id="humidity" style="width: 100%; height: 300px;"></div> 
+                </div>
+                <div id="tempBlock">
+                <!--<img src = "../Pictures/Temp.png" style="height: 30px" width="30px">-->
+                <div id="temperature" style="width: 100%; height: 300px;"></div>     
+                </div>
+            </div>
+            <div id="ingredients" style="height: 300px;"></div>
+
+        </div> 
+        <textarea id="hiddenString" hidden></textarea>
+    </section>
+    </div> 
+    <!-- Footer Section -->
+    <footer>University of Southern Denmark (SDU) Odense.<br> Software technology, 3rd semester, semesterproject, group 11.</footer> 
+</body> 
+</html>   

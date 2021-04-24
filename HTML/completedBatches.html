@@ -1,0 +1,218 @@
+<!DOCTYPE html> 
+<html> 
+    <script type="text/javascript" src="../JS/completedBatches.js"></script>
+    <script src="../Scripts/CanvasJS/canvasjs.min.js"></script>
+    <script type="text/javascript">
+
+    var humChartValues = [{}];
+    var tempChartValues = [{}];
+    var stateChartValues;
+    let humChart;
+    let tempChart;
+    let stateChart;
+
+    window.onload = function(){
+      createGraphs()
+    }
+
+      function createGraphs() {
+
+        tempChart = new CanvasJS.Chart("temperature", {
+          zoomEnabled: true,
+          zoomType: "xy",
+          title: {
+            text: "Temperature",
+          },
+            axisY:{
+              valueFormatString: "####.#",
+              stripLines:[{      
+                    startValue:65,
+                    endValue:70,
+                    color:"Red",
+                    lineDashType: "dash",
+                    label : "65°C"
+                }],
+            title: "Temperature in celcius"
+          },
+          axisX:{
+            title: "Reading",
+            minimum: 1
+          },
+          data: [
+            {
+              type: "line",
+              dataPoints: tempChartValues
+            },
+          ],
+        });
+
+        humChart = new CanvasJS.Chart("humidity", {
+          zoomEnabled: true,
+          zoomType: "xy",
+          title: {
+            text: "Humidity",
+          },
+            axisY:{
+              valueFormatString: "####.#",
+              title: "Relative humidity"
+          },
+          axisX:{
+            title: "Reading",
+            minimum: 1
+          },
+          data: [
+            {
+              type: "line",
+              dataPoints: humChartValues
+            },
+          ],
+        });
+        stateChart = new CanvasJS.Chart("states", {
+          title: {
+            text: "Time spent in states",
+          },
+            axisY:{
+              title: "Seconds"
+          },
+            axisX:{
+              title: "State",
+              minimum: 0
+              //prefix: "State: "
+          },
+          data: [
+            {
+              type: "column",
+              indexLabel: "{y}",
+              indexLabelPlacement: "inside",  
+              indexLabelOrientation: "horizontal",
+              dataPoints: stateChartValues
+            },
+          ],
+        });
+
+        humChart.render();
+        tempChart.render();
+        stateChart.render();
+        
+      };
+
+      function makeGraphs(){
+            tempChartValues = [{}];
+            humChartValues = [{}];
+            stateChartValues = [{}];
+            tempChart.options.data[0].dataPoints = tempChartValues;
+            humChart.options.data[0].dataPoints = humChartValues;
+            stateChart.options.data[0].dataPoints = stateChartValues;
+            let graphString;
+            let graphStringArray;
+            let humStringArray;
+            let tempStringArray;
+            let stateStringArray;
+            graphString = document.getElementById("hiddenString").value;
+            graphStringArray = graphString.split(";");
+            console.log(graphStringArray);
+            stateStringArray = graphStringArray[0].split(",");
+            tempStringArray = graphStringArray[1].split(",");
+            humStringArray = graphStringArray[2].split(",");
+            console.log(tempStringArray)
+            console.log(humStringArray)
+            for(var tempI = 0; tempI<tempStringArray.length; tempI++){
+                tempChartValues.push({x:(tempI+1), y:parseFloat(tempStringArray[tempI])})
+            }
+            for(var humI = 0; humI<humStringArray.length; humI++){
+                humChartValues.push({x:(humI+1), y:parseFloat(humStringArray[humI])})
+            }
+            for(var stateI = 0; stateI<stateStringArray.length; stateI++){
+              if(stateI<12 || stateI>14){
+                stateChartValues.push({x: stateI, y:parseInt(stateStringArray[stateI])});
+              }
+            }
+            tempChart.render();
+            humChart.render();
+            stateChart.render();
+        }
+
+        function clearGraphs(){
+          tempChart.options.data[0].dataPoints = [{}];
+          humChart.options.data[0].dataPoints = [{}];
+          humChart.options.data[0].dataPoints = [{}]
+          tempChart.render();
+          humChart.render();
+          stateChart.render();
+        }
+    </script>
+<head> 
+    <title>Interface for B&R automation</title> 
+    <link href="../CSS/completedBatches.css" rel="stylesheet">
+</head> 
+
+<body> 
+    <!-- Menu Navigation Bar -->
+    <div class="menu"> 
+        <a href="home.html">Home</a>
+        <div class="menuSpacers">
+            <a>||</a>
+        </div> 
+        <a href="completedBatches.html">Completed batches</a>
+        <div class="menuSpacers">
+            <a>||</a>
+        </div> 
+        <a href="events.html">Event log</a> 
+        <div class="menu-log"> 
+            <a href="login.html">Login</a> 
+        </div> 
+    </div> 
+
+    <!-- Body section -->
+      <section>
+          <div class="input">
+              <br> 
+                  <label for="batchID">Batch ID:</label><br> 
+                  <input id="batchID" type="text" name="batchID" placeholder="(0-65535)">
+                  <br>
+                  <br>
+                  <input id="getBatch" type="button" value="Get batch" onclick="updateReport()">
+
+          </class>
+      </section>
+      <section>
+          <div class="batchReport">
+                <h3 id="batchReportHeader">Batch report</h3> 
+                <ul id="batchReport">
+                    <br>
+                    <br>
+                <li id="batchIDList">Batch ID : </li>
+                <li id="productTypeList">Product type : </li>
+                <li id="machineSpeedList">Machine speed : </li>
+                <li id="amountOfProductsList">Amount of products : </li>
+                <li id="acceptableProductsList">Acceptable products : </li>
+                <li id="defectProductsList">Defect products : </li>
+                <li id="oeeList">OEE of batch : </li>
+                <li>Time spent in states (Shown in seconds) :
+                    <ol id="humidityList">
+                        <li><div id="states" style="height: 180px; width: 50%"></div></li>
+                    </ol>
+                </li>
+                <li>Temperature :
+                    <ol id="temperatureList">
+                        <li><div id="temperature" style="height: 180px; width: 50%"></div></li>
+                    </ol>
+                </li>
+                <li>Humidity :
+                    <ol id="humidityList">
+                        <li><div id="humidity" style="height: 180px; width: 50%"></div></li>
+                    </ol>
+                </li>
+                <li>Error log :
+                    <ol id="errorList">
+                    </ol>
+                </li>
+                
+                </ul>
+          </div>
+          <textarea id="hiddenString" hidden></textarea>
+      </section>
+    <!-- Footer Section -->
+    <footer>University of Southern Denmark (SDU) Odense.<br> Software technology, 3rd semester, semesterproject, group 11.</footer> 
+</body> 
+</html>   
